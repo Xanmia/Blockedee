@@ -20,11 +20,13 @@
 	<canvas id="viewport"></canvas>
 	<div class="bottomLeft"></div>
 	<div class="bottomRight"></div>
-	<div class="center" id="title"><img src="images/title.png" width="550" height="100" alt="Title">
+	<div class="center" id="title">
+		<img src="images/title.png" width="550" height="100" alt="Title">
+		
 	<div class="Titleitem Titleitem-text" onmouseup="startGame('puzzle');">Puzzle<div class="tooltip">A great place to start and learn the game. In addition there are some challenging puzzles to land.</div></div><div id='puzzleScore' class="mainFontSmaller"></div>
 	<div class="Titleitem Titleitem-text" onmouseup="startGame('madness');">Endless Insanity<div class="tooltip">Continuous stacking of random objects.  How high can you make it?</div></div><div id='madnessScore' class="mainFontSmaller"></div>
 	<div class="Titleitem Titleitem-text" onmouseup="startGame('controlled');">Endless Controlled<div class="tooltip">Continuous stacking of objects of your choosing by pressing the spacebar key as they drop.</div></div><div id='controlledScore' class="mainFontSmaller"></div>
-
+<div class="bottomLeft mainFontSmaller" id="credits"><br>Developed by <a href="http://twitter.com/xanmia">@Xanmia</a> <br/>Created with <a href="http://www.babylonjs.com/">BabylonJS</a></div>
 	</div>
 	
 		<div class="Titleitem Titleitem-text" onmouseup="loadLevelContainer();" id="levelSelect">Level Select</div>
