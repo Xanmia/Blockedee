@@ -4,10 +4,13 @@ html, body, canvas {
          padding: 0;
          margin: 0;
          overflow: hidden;
-		 background-color: #000000;
+		 background-color: #5C94FC;
 		 font-family:"Arial Black", Gadget, sans-serif; 
  }
-
+ .alert{
+	 color:yellow;
+	    font-size:20px;
+ }
  .mainFontSmall{
     font-size:20px;
     font-weight:bold;

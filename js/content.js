@@ -5,11 +5,11 @@ var beginsong, ingamesong;
 
 function ContentLoad(startDisplay)
 {
-   // if (!BABYLON.Engine.isSupported()) {
-		//startDisplay.innerHTML = "<div class='alert'>Sorry, your browser exudes awesomeness.<br> Just not awesome enough to play this game.<br>  Why don't you try IE 11, Firefox or Google Chrome instead.</div>";
+   if (!BABYLON.Engine.isSupported()) {
+		titleScreen.innerHTML = "<img src='images/title.png' width='550' height='100'><div class='alert'>Sorry, your browser exudes awesomeness.<br> Just not awesome enough to play this game.<br> Try IE 11, Firefox or Google Chrome instead.</div>";
 		//startDisplay.style.display = "block";
 		//loadingMessage.style.display = "none";
-		//}
+	}
 		
     canvas = document.getElementById("viewport");
     engine = new BABYLON.Engine(canvas,false)
