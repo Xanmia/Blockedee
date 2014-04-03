@@ -308,7 +308,7 @@ top:.87%;
     padding: 10px 10px 10px 10px;
     margin-bottom: 4px;
 }
-.item:hover {
+.unlocked:hover {
     opacity: 0.8;
 }
 
@@ -370,7 +370,7 @@ top:.87%;
   border-radius:5px;
   opacity:0;
   position:absolute;
-      padding: 10px 10px 10px 10px;
+  padding: 10px 10px 10px 10px;
   -webkit-transition: opacity 0.5s;
   -moz-transition:  opacity 0.5s;
   -ms-transition: opacity 0.5s;
