@@ -312,10 +312,6 @@ top:.87%;
     opacity: 0.8;
 }
 
-.item:active {
-    opacity: 0.6;
-}
-
 .item-text-right {
     position: absolute;
     right: 10px;
