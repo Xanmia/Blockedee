@@ -96,7 +96,7 @@ function ContentLoad(startDisplay)
 	nextObjtoDrop.scaling = new BABYLON.Vector3(size.scaleX, size.scaleY, size.scaleZ);	
 	camera2.target = nextObjtoDrop;
 	
-	 beginsong = new Audio("assets/begin.m4a");
+	 beginsong = new Audio("assets/game.mp3");
 	 beginsong.loop = true;
      beginsong.volume = 1;
 	 

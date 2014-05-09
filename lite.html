@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+     <title>-Blockedee-</title>
+	 <link rel="stylesheet" href="style/ScreenLayout.css" type="text/css" charset="utf-8">
+	 
+     <script type="text/javascript" src="js/babylon.1.9.0.js"></script>
+	 <script type="text/javascript" src="js/cannon.js"></script>
+	 <script src="js/objects.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+	<canvas id="viewport"></canvas>
+</body>
+<script src="js/contentlite.js" type="text/javascript" charset="utf-8"></script>
+
+     <script type="text/javascript">
+	// var engine = new BABYLON.Engine(canvas,true);
+	// var scene = new BABYLON.Scene(engine);
+
+//	 var canvas = document.getElementById('viewport');
+
+
+	 var distance = 300, maxdistance = 300,firstPosition,lastPosition, resting =false, pause = false, points = 0, contact = false,cameramove=true, time=0, checkMovement,countdownTimer, gameType = 'madness', playing =false, mass = 1, itemimpulse=.2 * mass, pushimpulse=.05 * mass;
+	 var level = 0;
+	 var itemNumber=0;
+	 var highscore = localStorage.getItem("HighScore") || 0;
+	 ContentLoad();
+
+	 checkMovement = new checkForSettling(function(){});
+
+
+	 startGame('madness');
+	 function startGame(type, lvl)
+	 {
+	     guide.isVisible = true;
+	     disposeCurrentLevel();
+	     points=0;
+	 	distance = maxdistance;
+	 	contact = false;
+	 	resting =false;
+	 	gameType = "madness";
+	     itemNumber = Math.round(Math.random()*3);
+	     nextObject(1);
+	     playing = true;
+    
+	 };
+
+	 function pauseGame(){
+	     pause = !pause;
+	 }
+
+	 function CreateObjectToDrop(objType){
+	    // scene.setGravity(new BABYLON.Vector3(0, -2.8, 0));
+
+	 	var size;
+	 	size = objects[objType];
+	     playerObj = obj.clone("temp");
+	     //playerGuide = guide.clone("temp");
+	     playerObj.position = new BABYLON.Vector3(0, distance, 0);
+	     guide.position = playerObj.position;
+	 	playerObj.scaling = new BABYLON.Vector3(size.scaleX, size.scaleY, size.scaleZ);
+	     guide.scaling = playerObj.scaling;
+	 	playerObj.setPhysicsState({ impostor: BABYLON.PhysicsEngine.BoxImpostor, mass: mass, friction: 0.9, restitution: 0.1 });
+    
+	 	var rotateDirection = Math.round(Math.random()*3);
+	 	if (rotateDirection === 1){
+	 		playerObj.applyImpulse( new BABYLON.Vector3(itemimpulse,0,0),  new BABYLON.Vector3(0,0,0));
+	 	}
+	 	else if (rotateDirection === 2){
+	 		playerObj.applyImpulse( new BABYLON.Vector3(0,0,itemimpulse),  new BABYLON.Vector3(0,0,0));
+	 	}
+	 	else if (rotateDirection === 3){
+	 		playerObj.applyImpulse( new BABYLON.Vector3(0,0,-itemimpulse),  new BABYLON.Vector3(0,0,0));
+	 	}
+	 	else {
+	 		playerObj.applyImpulse( new BABYLON.Vector3(-itemimpulse,0,0),  new BABYLON.Vector3(0,0,0));
+	 	}
+	 	resting = false;////game status reset to droping type/////////////////////////////////////////////
+	 }
+
+	 function lockOlderObjects(intLockedBackTo)
+	 {
+	 	////////////////go through previous object and lock in place if its so many peices ago///////////
+	 	var tobeLocked = scene.meshes.filter(function(value){ return value.name=="temp"; });
+	 	var lock = tobeLocked.length-intLockedBackTo;
+	 	if (lock >= 0){
+	 		tobeLocked[lock].setPhysicsState({ impostor: BABYLON.PhysicsEngine.BoxImpostor, mass: 0, friction: 0.9, restitution: 0.1 });
+	 	}
+	 	///////////////////////////////////////////////////////////////////////////////////////////////////
+	 }
+
+	 function disposeCurrentLevel(){
+	 	if(scene != null){
+	 		var tobeDisposed = scene.meshes.filter(function(value){ return value.name=="temp"; });
+	 		var length = tobeDisposed.length;
+	 		while(length--){
+	 			//tobeDisposed[length].setPhysicsState({});
+	 			tobeDisposed[length].dispose();
+	 		}
+	 	}
+	 }
+
+	 function changeSkin ( skin )
+	 {
+	     material.emissiveTexture = new BABYLON.Texture("images/" + skins[skin].location, scene);
+	 }
+
+	 function nextObject(objType)
+	 {
+
+	     //startMenu.setTotal(points);
+	 	cameramove = true;
+	     camera.radius = 60;
+	 	//distance += 10; ///needs more acurate to size of droping object and how it settles for camera
+	
+	 	lockOlderObjects(1);////go through previous object and lock in place if its so many peices ago -- helps with many objects/framerate ///////////
+	
+	 	CreateObjectToDrop(objType);/////create object to drop///////////////////////////
+
+	 	camera.target = playerObj;
+    
+	 	if(gameType === 'madness'){
+	 		itemNumber = (Math.random()*(objects.length-.01)).toString();
+	 		itemNumber = itemNumber.substring(0,1);
+	 		itemNumber = Number(itemNumber);
+	 	}
+    
+	 	/////////////////////////wait till it hits bottom and stops moving///////////////////////
+	 	checkMovement = new checkForSettling(function(){
+	                                          if(contact)
+	                                          {
+	                                          return;
+	                                          }
+	                                          distance = maxdistance + playerObj.position.y;
+	                                          points+=1;
+	                                          if(points > 9)
+	                                          {
+	                                             guide.isVisible = false;
+	                                          }
+	                                          resting = true; ///object is resting and not contacting the ground
+	                                          nextObject(itemNumber); ///if controlled this should be selector object and not random
+	                                          });
+	 }
+ 
+	  document.addEventListener("touchstart", function (e) {
+	         if (e.touches.length) {
+	             firstPosition = {x: e.touches[0].clientX,y: e.touches[0].clientY};
+	         }
+	  }, false);
+
+	 document.addEventListener("touchmove", function (e) {
+	                           if (e.touches.length) {
+	                           var x = e.touches[0].clientX;
+	                           var y = e.touches[0].clientY;
+                          
+	                           lastPosition = { x: x, y: y };
+	                           }
+	                           }, false);
+
+	 document.addEventListener("touchend", function (e) {
+	                           var offsetX = lastPosition.x - firstPosition.x;
+	                           var offsetY = lastPosition.y - firstPosition.y;
+	                          // console.log(offsetX + "," + offsetY);
+	                           handleActions({ x: offsetX, y: offsetY });
+	                           firstPosition = null;
+	                           lastPosition = null;
+	                           }, false);
+
+
+	 function checkForSettling(returnFunction){
+	 	var _lastChanges = new Array(20);
+	 	var _returnFunction = returnFunction;
+	 	this.update = function(obj){
+	 		var rotation = obj.rotationQuaternion || obj.rotation;
+	 		var rotY = Math.round(rotation.y * 100);
+	 		var rotX = Math.round(rotation.x * 100);
+	 		var rotZ = Math.round(rotation.z * 100);
+	         var posY = Math.round(obj.position.y * 100);
+	 		var similar = _lastChanges.filter(function(value){ return value.y==posY && value.rY==rotY && value.rX==rotX && value.rZ==rotZ; });
+	 		if (similar.length===10){
+			
+	 			_returnFunction();
+	 		}
+	         _lastChanges.push({y:posY, rY:rotY, rX:rotX, rZ:rotZ});
+	 		_lastChanges.splice(0, 1); //only hold so many measures
+	     }
+	 }
+
+	 function adjustToZero()
+	 {
+	     playerObj.applyImpulse( new BABYLON.Vector3(-.42,0,0),  new BABYLON.Vector3(0,0,0));
+	 }
+
+
+	 function handleActions(event){
+	     var adjX = (event.x < 0 ? event.x * -1 : event.x);
+	     var adjY = (event.y < 0 ? event.y * -1 : event.y);
+
+	     if(adjX>adjY && event.x >= 0){///right 100 , 0   (x < 0 ? x * -1 : x)>(y < 0 ? y * -1 : y)(difference) and x >= 0
+	         playerObj.applyImpulse( new BABYLON.Vector3(pushimpulse,0,0),  new BABYLON.Vector3(0,0,0));
+	     }
+	     if(adjX>adjY && event.x < 0){///left  -100, 0  x>y and x < 0
+	         playerObj.applyImpulse( new BABYLON.Vector3(-pushimpulse,0,0),  new BABYLON.Vector3(0,0,0));
+	     }
+	     if(adjX<adjY && event.y < 0){///up 0, -100  adjX<adjY && event.y < 0
+	         playerObj.applyImpulse( new BABYLON.Vector3(0,0,pushimpulse),  new BABYLON.Vector3(0,0,0));
+	     }
+	     if(adjX<adjY && event.y >= 0){////down 0, 100  adjX<adjY && event.y >= 0
+	         playerObj.applyImpulse( new BABYLON.Vector3(0,0,-pushimpulse),  new BABYLON.Vector3(0,0,0));
+	     }
+	 }
+
+	 scene.registerBeforeRender(function() {
+	                     if(playing){
+	                           guide.position = playerObj.position;
+	                        //  playerObj.applyImpulse( new BABYLON.Vector3(0,.1,0),  new BABYLON.Vector3(0,0,0));
+	                           if(playerObj.position.y < 200 + (distance - maxdistance) && cameramove){
+	                               //adjustToZero();
+	                            cameramove = false;
+	                            var cameraMove = new BABYLON.Animation("cameraMove", "radius", 60, BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+	                                                                   BABYLON.Animation.ANIMATIONLOOPMODE_LOOP);
+	                            var camerakeys = [];
+	                            camerakeys.push({
+	                                            frame: 0,
+	                                            value: 60
+	                                            });
+	                            camerakeys.push({
+	                                            frame: 100,
+	                                            value: 120
+	                                            });
+	                            cameraMove.setKeys(camerakeys);
+	                            camera.animations.push(cameraMove);
+	                            scene.beginAnimation(camera, 0, 100, false, 0, function(){});
+	                            }
+                        
+                        
+                           
+	                         var objectsOut = scene.meshes.filter(function(value){ return value.name=="temp"; });
+	                         if( resting == false){ //started == true &&
+	                            checkMovement.update(playerObj);
+	                         }
+                           
+	                         if((playerObj.intersectsMesh(dock,false) || playerObj.intersectsMesh(otherground,false)) && objectsOut.length > 1){
+	                            contact = true;
+	                            if (points > highscore){
+	                                 localStorage.setItem("HighScore", points);
+	                                 highscore = points;
+	                            }
+	                           // startMenu.showGameover(highscore);
+	                           // adBanner.show();
+	                         }
+                           
+	                         if(playerObj.intersectsMesh(otherground,false) && objectsOut.length == 1){
+	                            contact = true;
+	                            if (points > highscore){
+	                             localStorage.setItem("HighScore", points);
+	                             highscore = points;
+	                            }
+	                           // startMenu.showGameover(highscore);
+	      
+	                         }
+                           
+	                     }
+                           
+	 });
+
+	 engine.runRenderLoop(function () {
+	                      if(!pause){
+	                      scene.render();
+	                      }
+                     
+	                      });
+ 
+ </script>
+ </html>
